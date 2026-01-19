@@ -6,7 +6,6 @@ const HTMLBuilder = {
         
         const tabsHTML = parts.map((p, idx) => `<button class="tab-btn ${idx===0?'active':''}" onclick="showPart('${p.id}')">${p.name}</button>`).join('');
 
-        // ... (הקוד של בניית השאלות נשאר זהה עד החלק של הסקריפטים וה-CSS) ...
         const sectionsHTML = parts.map((p, idx) => {
             const partQuestions = questions.filter(q => q.part === p.id);
             const partInstrHtml = instructions.parts[p.id] ? `<div class="part-instructions">${instructions.parts[p.id].replace(/\n/g, '<br>')}</div>` : '';
@@ -115,7 +114,6 @@ const HTMLBuilder = {
         .sound-btn.playing { background: #e74c3c; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* Updated Highlighter Tool CSS */
         #highlighterTool { position: fixed; top: 150px; right: 20px; width: 60px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 30px; padding: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 10000; border: 1px solid #ddd; transition: opacity 0.3s; }
         .color-btn { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .color-btn:hover { transform: scale(1.2); }
@@ -194,24 +192,34 @@ const HTMLBuilder = {
             </div>
         </div>
         <script>
+        // שגיאות גלובליות
+        window.onerror = function(msg, url, line) {
+            alert("שגיאה בטעינת המבחן:\\n" + msg + "\\nשורה: " + line);
+        };
+        
         let totalTime=${duration}*60,timerInterval,examStarted=false;
         function simpleHash(s){let h=0;for(let i=0;i<s.length;i++)h=(h<<5)-h+s.charCodeAt(i)|0;return h.toString();}
         window.onload = function() {
-            if(document.body.dataset.status === 'submitted') {
-                document.getElementById('startScreen').style.display='none';
-                document.getElementById('mainContainer').style.filter='none';
-                document.getElementById('timerBadge').style.display='none';
-                document.getElementById('successModal').style.display='flex';
-                document.querySelectorAll('input,textarea').forEach(e=>{
-                    if(!e.classList.contains('grade-input') && !e.classList.contains('teacher-comment') && e.id !== 'teacherCodeInput') {
-                        e.setAttribute('readonly','true');
-                        e.disabled = true;
-                    }
-                });
-                document.querySelector('.student-submit-area').style.display='none';
+            try {
+                if(document.body.dataset.status === 'submitted') {
+                    document.getElementById('startScreen').style.display='none';
+                    document.getElementById('mainContainer').style.filter='none';
+                    document.getElementById('timerBadge').style.display='none';
+                    document.getElementById('successModal').style.display='flex';
+                    document.querySelectorAll('input,textarea').forEach(e=>{
+                        if(!e.classList.contains('grade-input') && !e.classList.contains('teacher-comment') && e.id !== 'teacherCodeInput') {
+                            e.setAttribute('readonly','true');
+                            e.disabled = true;
+                        }
+                    });
+                    document.querySelector('.student-submit-area').style.display='none';
+                }
+            } catch(e) {
+                console.error(e);
+                alert('שגיאה באתחול המבחן');
             }
         };
-        // ... (קוד האודיו נשאר ללא שינוי) ...
+        
         let audioCtx = null;
         let isPlayingSound = false;
         let soundLoopTimeout;
@@ -286,18 +294,20 @@ const HTMLBuilder = {
         function setMarker(color, btn) {
             markerColor = color;
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-            if(btn && color !== null) btn.classList.add('active'); // לא מסמנים אם זה כפתור הביטול
+            if(btn && color !== null) btn.classList.add('active');
             
             if(color) {
-                // אם זה מחק (transparent), נשתמש באייקון אחר או רגיל
-                let svg = "";
+                // שימוש במרכאות רגילות כדי למנוע שגיאות תחביר בקובץ הנוצר
+                let svg = '';
                 if (color === 'transparent') {
-                     svg = \`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#000000" d="M15.14,3c-0.51,0-1.02,0.2-1.41,0.59L2.59,14.73C1.81,15.51,1.81,16.78,2.59,17.56l5.85,5.85c0.39,0.39,0.9,0.59,1.41,0.59s1.02-0.2,1.41-0.59l11.14-11.14c0.78-0.78,0.78-2.05,0-2.83l-5.85-5.85C16.17,3.2,15.65,3,15.14,3z M15.14,4.41l5.85,5.85l-11.14,11.14l-5.85-5.85L15.14,4.41z"/></svg>\`;
+                     // אייקון מחק
+                     svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#000000" d="M15.14,3c-0.51,0-1.02,0.2-1.41,0.59L2.59,14.73C1.81,15.51,1.81,16.78,2.59,17.56l5.85,5.85c0.39,0.39,0.9,0.59,1.41,0.59s1.02-0.2,1.41-0.59l11.14-11.14c0.78-0.78,0.78-2.05,0-2.83l-5.85-5.85C16.17,3.2,15.65,3,15.14,3z M15.14,4.41l5.85,5.85l-11.14,11.14l-5.85-5.85L15.14,4.41z"/></svg>';
                 } else {
-                     svg = \`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="\${color}" stroke="black" stroke-width="1" d="M28.06 6.94L25.06 3.94a2.003 2.003 0 0 0-2.83 0l-16.17 16.17a2.003 2.003 0 0 0-.58 1.41V26h4.48c.53 0 1.04-.21 1.41-.59l16.17-16.17c.79-.78.79-2.05.52-2.3zM8.5 24H7v-1.5l14.5-14.5 1.5 1.5L8.5 24z"/><path fill="\${color}" d="M4 28l4-4H4z"/></svg>\`;
+                     // אייקון מרקר צבעוני
+                     svg = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="' + color + '" stroke="black" stroke-width="1" d="M28.06 6.94L25.06 3.94a2.003 2.003 0 0 0-2.83 0l-16.17 16.17a2.003 2.003 0 0 0-.58 1.41V26h4.48c.53 0 1.04-.21 1.41-.59l16.17-16.17c.79-.78.79-2.05.52-2.3zM8.5 24H7v-1.5l14.5-14.5 1.5 1.5L8.5 24z"/><path fill="' + color + '" d="M4 28l4-4H4z"/></svg>';
                 }
                 const url = 'data:image/svg+xml;base64,' + btoa(svg);
-                document.body.style.cursor = \`url('\${url}') 0 32, auto\`;
+                document.body.style.cursor = 'url(' + url + ') 0 32, auto';
             } else {
                 document.body.style.cursor = 'default';
             }
@@ -309,7 +319,6 @@ const HTMLBuilder = {
             if (sel.rangeCount > 0 && !sel.isCollapsed) {
                 const range = sel.getRangeAt(0);
                 const common = range.commonAncestorContainer;
-                // מניעת סימון באזורים אסורים
                 if(common.nodeType === 1 && (common.closest('#highlighterTool') || common.tagName === 'TEXTAREA' || common.tagName === 'INPUT')) return;
                 if(common.nodeType === 3 && (common.parentNode.closest('#highlighterTool') || common.parentNode.tagName === 'TEXTAREA')) return;
                 
@@ -351,10 +360,8 @@ const HTMLBuilder = {
             const acts=document.getElementById('submissionActions');
             if("${teacherEmail}"){const l="https://mail.google.com/mail/?view=cm&to=${teacherEmail}&su=Exam Submission&body=Attached";acts.innerHTML+='<a href="'+l+'" target="_blank" style="display:block;margin:10px;padding:10px;background:#3498db;color:white;text-decoration:none;">שלח במייל (צרף קובץ!)</a>';}
             
-            // פתיחת חלון הדרייב אוטומטית בהגשה
             if("${driveLink}"){
                 acts.innerHTML+='<a href="${driveLink}" target="_blank" style="display:block;margin:10px;padding:10px;background:#f1c40f;color:black;text-decoration:none;">העלה לדרייב (פתח תיקייה)</a>';
-                // פתיחת חלון קופץ
                 window.open("${driveLink}", "_blank");
             }
         }
@@ -380,7 +387,7 @@ const HTMLBuilder = {
                 document.getElementById('teacherSolutionContainer').style.display='block';
                 document.getElementById('solutionFrame').src="${solutionDataUrl}";
             }
-            alert('מצב בדיקה הופעל.\nכעת ניתן להזין ציונים והערות לכל שאלה וסעיף.');
+            alert('מצב בדיקה הופעל.');
         }
         function saveGradedExam(){
             document.querySelectorAll('input,textarea').forEach(i=>i.setAttribute('value',i.value));
