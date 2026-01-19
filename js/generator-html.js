@@ -6,6 +6,7 @@ const HTMLBuilder = {
         
         const tabsHTML = parts.map((p, idx) => `<button class="tab-btn ${idx===0?'active':''}" onclick="showPart('${p.id}')">${p.name}</button>`).join('');
 
+        // ... (הקוד של בניית השאלות נשאר זהה עד החלק של הסקריפטים וה-CSS) ...
         const sectionsHTML = parts.map((p, idx) => {
             const partQuestions = questions.filter(q => q.part === p.id);
             const partInstrHtml = instructions.parts[p.id] ? `<div class="part-instructions">${instructions.parts[p.id].replace(/\n/g, '<br>')}</div>` : '';
@@ -114,10 +115,12 @@ const HTMLBuilder = {
         .sound-btn.playing { background: #e74c3c; animation: pulse 1s infinite; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        #highlighterTool { position: fixed; top: 150px; right: 20px; width: 50px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 30px; padding: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 10000; border: 1px solid #ddd; transition: opacity 0.3s; }
-        .color-btn { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        /* Updated Highlighter Tool CSS */
+        #highlighterTool { position: fixed; top: 150px; right: 20px; width: 60px; background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 30px; padding: 15px 0; display: flex; flex-direction: column; align-items: center; gap: 12px; z-index: 10000; border: 1px solid #ddd; transition: opacity 0.3s; }
+        .color-btn { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.2s; }
         .color-btn:hover { transform: scale(1.2); }
         .color-btn.active { border-color: #333; transform: scale(1.1); box-shadow: 0 0 0 2px #333; }
+        .eraser-btn { font-size: 20px; display: flex; justify-content: center; align-items: center; background: #f0f0f0; border: 1px solid #ccc; }
         .drag-handle { cursor: move; color: #ccc; font-size: 20px; line-height: 10px; margin-bottom: 5px; user-select: none; }
         
         #startScreen,#timesUpModal,#securityModal,#successModal{position:fixed;top:0;left:0;width:100%;height:100%;background:#2c3e50;color:white;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:9999;}#timesUpModal,#securityModal,#successModal{display:none;}
@@ -125,7 +128,16 @@ const HTMLBuilder = {
         #securityModal h2, #timesUpModal h2 { font-size: 3rem; margin-bottom: 10px; color: #e74c3c; }
         </style></head><body>
         ${embeddedProjectData}
-        <div id="highlighterTool"><div class="drag-handle" id="hlDragHandle">:::</div><div class="color-btn" style="background:#ffeb3b;" onclick="setMarker('#ffeb3b', this)" title="צהוב"></div><div class="color-btn" style="background:#a6ff00;" onclick="setMarker('#a6ff00', this)" title="ירוק"></div><div class="color-btn" style="background:#ff4081;" onclick="setMarker('#ff4081', this)" title="ורוד"></div><div class="color-btn" style="background:#00e5ff;" onclick="setMarker('#00e5ff', this)" title="תכלת"></div><div class="color-btn" style="background:#fff; border:1px solid #ccc; display:flex; justify-content:center; align-items:center; font-size:12px;" onclick="setMarker(null, this)" title="בטל מרקר">❌</div></div>
+        
+        <div id="highlighterTool">
+            <div class="drag-handle" id="hlDragHandle">:::</div>
+            <div class="color-btn" style="background:#ffeb3b;" onclick="setMarker('#ffeb3b', this)" title="צהוב"></div>
+            <div class="color-btn" style="background:#a6ff00;" onclick="setMarker('#a6ff00', this)" title="ירוק"></div>
+            <div class="color-btn" style="background:#ff4081;" onclick="setMarker('#ff4081', this)" title="ורוד"></div>
+            <div class="color-btn" style="background:#00e5ff;" onclick="setMarker('#00e5ff', this)" title="תכלת"></div>
+            <div class="color-btn eraser-btn" onclick="setMarker('transparent', this)" title="מחק סימון">🧹</div>
+            <div style="font-size:10px; color:#999; margin-top:5px; cursor:pointer;" onclick="setMarker(null, this)" title="בטל כלי">❌</div>
+        </div>
 
         <div id="startScreen">
             <h1>${examTitle}</h1>
@@ -163,6 +175,7 @@ const HTMLBuilder = {
             <div style="text-align:center;">${logoHTML}<h1>${examTitle}</h1></div>
             <div class="teacher-controls" style="display:none;">
                 <h3 style="margin-top:0; color:#d35400;">👨‍🏫 אזור בדיקה וציינון</h3>
+                <p style="font-size:0.9rem; color:#7f8c8d;">הזן ניקוד לכל סעיף וכתוב הערות במידת הצורך. הציון הסופי יתעדכן אוטומטית.</p>
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                     <div style="font-size: 1.2em; font-weight: bold;">ציון סופי מחושב: <span id="teacherCalculatedScore" style="color: var(--success); font-size:1.4em;">0</span></div>
                     <div>
@@ -198,6 +211,7 @@ const HTMLBuilder = {
                 document.querySelector('.student-submit-area').style.display='none';
             }
         };
+        // ... (קוד האודיו נשאר ללא שינוי) ...
         let audioCtx = null;
         let isPlayingSound = false;
         let soundLoopTimeout;
@@ -258,6 +272,7 @@ const HTMLBuilder = {
         function runTimer(){clearInterval(timerInterval);timerInterval=setInterval(()=>{totalTime--;updateTimer();if(totalTime<=0){clearInterval(timerInterval);document.getElementById('timesUpModal').style.display='flex';}},1000);}
         function updateTimer(){let m=Math.floor(totalTime/60),s=totalTime%60;document.getElementById('timerText').innerText=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s);}
         function showPart(id){document.querySelectorAll('.exam-section').forEach(e=>e.classList.remove('active'));document.getElementById('part-'+id).classList.add('active');document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));event.target.classList.add('active');}
+        
         function calcTotal(){
             let t=0;
             document.querySelectorAll('.grade-input').forEach(i=>{
@@ -266,27 +281,38 @@ const HTMLBuilder = {
             const display = document.getElementById('teacherCalculatedScore');
             if(display) display.innerText = t;
         }
+        
         let markerColor = null;
         function setMarker(color, btn) {
             markerColor = color;
             document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-            if(btn) btn.classList.add('active');
+            if(btn && color !== null) btn.classList.add('active'); // לא מסמנים אם זה כפתור הביטול
+            
             if(color) {
-                const svg = \`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="\${color}" stroke="black" stroke-width="1" d="M28.06 6.94L25.06 3.94a2.003 2.003 0 0 0-2.83 0l-16.17 16.17a2.003 2.003 0 0 0-.58 1.41V26h4.48c.53 0 1.04-.21 1.41-.59l16.17-16.17c.79-.78.79-2.05.52-2.3zM8.5 24H7v-1.5l14.5-14.5 1.5 1.5L8.5 24z"/><path fill="\${color}" d="M4 28l4-4H4z"/></svg>\`;
+                // אם זה מחק (transparent), נשתמש באייקון אחר או רגיל
+                let svg = "";
+                if (color === 'transparent') {
+                     svg = \`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="#000000" d="M15.14,3c-0.51,0-1.02,0.2-1.41,0.59L2.59,14.73C1.81,15.51,1.81,16.78,2.59,17.56l5.85,5.85c0.39,0.39,0.9,0.59,1.41,0.59s1.02-0.2,1.41-0.59l11.14-11.14c0.78-0.78,0.78-2.05,0-2.83l-5.85-5.85C16.17,3.2,15.65,3,15.14,3z M15.14,4.41l5.85,5.85l-11.14,11.14l-5.85-5.85L15.14,4.41z"/></svg>\`;
+                } else {
+                     svg = \`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><path fill="\${color}" stroke="black" stroke-width="1" d="M28.06 6.94L25.06 3.94a2.003 2.003 0 0 0-2.83 0l-16.17 16.17a2.003 2.003 0 0 0-.58 1.41V26h4.48c.53 0 1.04-.21 1.41-.59l16.17-16.17c.79-.78.79-2.05.52-2.3zM8.5 24H7v-1.5l14.5-14.5 1.5 1.5L8.5 24z"/><path fill="\${color}" d="M4 28l4-4H4z"/></svg>\`;
+                }
                 const url = 'data:image/svg+xml;base64,' + btoa(svg);
                 document.body.style.cursor = \`url('\${url}') 0 32, auto\`;
             } else {
                 document.body.style.cursor = 'default';
             }
         }
+        
         document.addEventListener('mouseup', () => {
             if (!markerColor) return;
             const sel = window.getSelection();
             if (sel.rangeCount > 0 && !sel.isCollapsed) {
                 const range = sel.getRangeAt(0);
                 const common = range.commonAncestorContainer;
+                // מניעת סימון באזורים אסורים
                 if(common.nodeType === 1 && (common.closest('#highlighterTool') || common.tagName === 'TEXTAREA' || common.tagName === 'INPUT')) return;
                 if(common.nodeType === 3 && (common.parentNode.closest('#highlighterTool') || common.parentNode.tagName === 'TEXTAREA')) return;
+                
                 document.designMode = "on";
                 if(document.queryCommandEnabled("hiliteColor")) {
                     document.execCommand("styleWithCSS", false, true);
@@ -296,6 +322,7 @@ const HTMLBuilder = {
                 sel.removeAllRanges();
             }
         });
+        
         const tool = document.getElementById('highlighterTool');
         const handle = document.getElementById('hlDragHandle');
         let isDragging = false, startX, startY, initialLeft, initialTop;
@@ -304,11 +331,13 @@ const HTMLBuilder = {
             document.onmouseup = function(){isDragging=false; document.onmouseup=null; document.onmousemove=null;};
             document.onmousemove = function(e){if(!isDragging)return; tool.style.top=(initialTop+e.clientY-startY)+"px"; tool.style.left=(initialLeft+e.clientX-startX)+"px"; tool.style.right='auto';};
         };
+        
         function lockExam(){ clearInterval(timerInterval); document.getElementById('securityModal').style.display='flex'; }
         function checkSec(){ if(!examStarted||document.body.dataset.status==='submitted')return; if(document.hidden){lockExam();} }
         document.addEventListener('visibilitychange',checkSec);
         document.addEventListener('fullscreenchange', () => { if(!document.fullscreenElement && examStarted && document.body.dataset.status!=='submitted') { lockExam(); } });
         function unlockExam(){ if(simpleHash(document.getElementById('teacherCodeInput').value)==="${unlockCodeHash}"){ document.getElementById('securityModal').style.display='none'; document.documentElement.requestFullscreen().catch(e=>console.log(e)); runTimer(); } else { alert('קוד שגוי'); } }
+        
         function submitExam(){
             document.body.dataset.status='submitted';
             if(document.fullscreenElement) document.exitFullscreen();
@@ -318,9 +347,16 @@ const HTMLBuilder = {
             const html="<!DOCTYPE html>"+document.documentElement.outerHTML;
             const b=new Blob([html],{type:'text/html'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download="פתור-"+(document.getElementById('studentNameField').value||'תלמיד')+".html"; a.click();
             document.getElementById('successModal').style.display='flex';
+            
             const acts=document.getElementById('submissionActions');
             if("${teacherEmail}"){const l="https://mail.google.com/mail/?view=cm&to=${teacherEmail}&su=Exam Submission&body=Attached";acts.innerHTML+='<a href="'+l+'" target="_blank" style="display:block;margin:10px;padding:10px;background:#3498db;color:white;text-decoration:none;">שלח במייל (צרף קובץ!)</a>';}
-            if("${driveLink}"){acts.innerHTML+='<a href="${driveLink}" target="_blank" style="display:block;margin:10px;padding:10px;background:#f1c40f;color:black;text-decoration:none;">העלה לדרייב</a>';}
+            
+            // פתיחת חלון הדרייב אוטומטית בהגשה
+            if("${driveLink}"){
+                acts.innerHTML+='<a href="${driveLink}" target="_blank" style="display:block;margin:10px;padding:10px;background:#f1c40f;color:black;text-decoration:none;">העלה לדרייב (פתח תיקייה)</a>';
+                // פתיחת חלון קופץ
+                window.open("${driveLink}", "_blank");
+            }
         }
         function enableGradingFromModal() {
              if(simpleHash(prompt('הכנס קוד מורה:'))==="${unlockCodeHash}") {
@@ -344,6 +380,7 @@ const HTMLBuilder = {
                 document.getElementById('teacherSolutionContainer').style.display='block';
                 document.getElementById('solutionFrame').src="${solutionDataUrl}";
             }
+            alert('מצב בדיקה הופעל.\nכעת ניתן להזין ציונים והערות לכל שאלה וסעיף.');
         }
         function saveGradedExam(){
             document.querySelectorAll('input,textarea').forEach(i=>i.setAttribute('value',i.value));
